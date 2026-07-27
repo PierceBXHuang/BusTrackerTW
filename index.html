@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>BusTrackerTW</title>
 
     <link rel="stylesheet" href="style.css">
@@ -14,34 +13,82 @@
 
     <div class="container">
 
-        <h1>🚌 BusTrackerTW</h1>
+        <!-- 首頁 -->
+        <div id="homePage">
 
-        <p class="subtitle">
-            即時公車查詢系統
-        </p>
+            <h1>🚌 BusTrackerTW</h1>
 
-        <div class="menu">
+            <p class="subtitle">
+                即時公車查詢系統
+            </p>
 
-            <button id="searchBtn">
-                🔍 開始查詢
-            </button>
+            <div class="menu">
 
-            <button id="favoriteBtn">
-                ⭐ 我的收藏
-            </button>
+                <button id="searchBtn">
+                    🔍 開始查詢
+                </button>
 
-            <button id="settingBtn">
-                ⚙️ 設定
-            </button>
+                <button id="favoriteBtn">
+                    ⭐ 我的收藏
+                </button>
+
+                <button id="settingBtn">
+                    ⚙️ 設定
+                </button>
+
+            </div>
+
+            <p class="version">
+                Version 0.1
+            </p>
 
         </div>
 
-        <p class="version">
-            Version 0.1
-        </p>
+        <!-- 查詢頁 -->
+        <div id="searchPage" style="display:none;">
+
+            <h2>🔍 公車查詢</h2>
+
+            <input
+                type="text"
+                id="routeInput"
+                placeholder="請輸入公車路線 (例如：606)">
+
+            <input
+                type="text"
+                id="startInput"
+                placeholder="起點站">
+
+            <input
+                type="text"
+                id="endInput"
+                placeholder="終點站">
+
+            <button id="queryBtn">
+                🚍 開始查詢
+            </button>
+
+            <button id="backBtn">
+                ⬅ 返回首頁
+            </button>
+
+            <hr>
+
+<div id="resultBox">
+
+    <h3>📋 查詢結果</h3>
+
+    <p id="resultText">
+        尚未查詢任何資料
+    </p>
+
+</div>
+
+        </div>
 
     </div>
 
+    <script src="config.js"></script>
     <script src="script.js"></script>
 
 </body>
