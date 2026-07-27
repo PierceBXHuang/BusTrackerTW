@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 
 <head>
     <meta charset="UTF-8">
@@ -11,85 +11,69 @@
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- 首頁 -->
-        <div id="homePage">
+    <h1>🚌 BusTrackerTW</h1>
 
-            <h1>🚌 BusTrackerTW</h1>
+    <input
+        id="routeInput"
+        placeholder="公車路線，例如 606">
 
-            <p class="subtitle">
-                即時公車查詢系統
-            </p>
+    <input
+        id="startInput"
+        placeholder="起點站">
 
-            <div class="menu">
+    <input
+        id="endInput"
+        placeholder="終點站">
 
-                <button id="searchBtn">
-                    🔍 開始查詢
-                </button>
+    <button id="searchBtn">
+        查詢
+    </button>
 
-                <button id="favoriteBtn">
-                    ⭐ 我的收藏
-                </button>
+    <button id="favoriteBtn">
+        ⭐ 收藏
+    </button>
 
-                <button id="settingBtn">
-                    ⚙️ 設定
-                </button>
+    <div id="loading" style="display:none">
+        查詢中...
+    </div>
 
-            </div>
+    <div id="error"></div>
 
-            <p class="version">
-                Version 0.1
-            </p>
+    <div id="resultCard" style="display:none">
 
-        </div>
+        <h2 id="routeName"></h2>
 
-        <!-- 查詢頁 -->
-        <div id="searchPage" style="display:none;">
+        <p id="destination"></p>
 
-            <h2>🔍 公車查詢</h2>
+        <hr>
 
-            <input
-                type="text"
-                id="routeInput"
-                placeholder="請輸入公車路線 (例如：606)">
+        <p>第一班：<span id="eta1">--</span></p>
 
-            <input
-                type="text"
-                id="startInput"
-                placeholder="起點站">
+        <p>第二班：<span id="eta2">--</span></p>
 
-            <input
-                type="text"
-                id="endInput"
-                placeholder="終點站">
+        <p>第三班：<span id="eta3">--</span></p>
 
-            <button id="queryBtn">
-                🚍 開始查詢
-            </button>
+        <hr>
 
-            <button id="backBtn">
-                ⬅ 返回首頁
-            </button>
+        <small>
 
-            <hr>
+            更新時間：
 
-<div id="resultBox">
+            <span id="updateTime"></span>
 
-    <h3>📋 查詢結果</h3>
-
-    <p id="resultText">
-        尚未查詢任何資料
-    </p>
-
-</div>
-
-        </div>
+        </small>
 
     </div>
 
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+    <h2>⭐ 我的收藏</h2>
+
+    <div id="favoriteList"></div>
+
+</div>
+
+<script src="script.js"></script>
 
 </body>
 
