@@ -140,22 +140,21 @@ async function getETA(route){
 
 }
 
-function formatETA(sec){
+function formatETA(sec) {
 
-    if(sec==null){
-
+    if (sec == null) {
         return "--";
-
     }
 
-    if(sec<=60){
-
+    // 1 分鐘內
+    if (sec <= 60) {
         return "即將進站";
-
     }
 
-    return Math.ceil(sec/60)+" 分";
+    // 提前 30 秒切換分鐘，較接近官方公車動態
+    const minutes = Math.max(1, Math.ceil((sec - 30) / 60));
 
+    return minutes + " 分";
 }
 
 async function searchBus() {
