@@ -15,6 +15,10 @@ let accessToken = "";
 
 let refreshTimer=null;
 
+let routeListCache = [];
+let stopCache = {};
+
+
 async function getToken(){
 
     const body = new URLSearchParams({
@@ -56,7 +60,7 @@ async function getToken(){
 
 }
 
-getToken();
+
 
 const API_BASE = "https://tdx.transportdata.tw/api/basic/v2";
 
@@ -80,6 +84,50 @@ const eta3 = document.getElementById("eta3");
 
 const updateTime = document.getElementById("updateTime");
 const CITY = "Taipei";
+
+// ===== 查詢模式 =====
+
+const selectMode = document.getElementById("selectMode");
+const manualMode = document.getElementById("manualMode");
+
+const routeSelect = document.getElementById("routeSelect");
+const routeSearch =
+document.getElementById("routeSearch");
+const startSelect = document.getElementById("startSelect");
+const endSelect = document.getElementById("endSelect");
+
+const modeRadios =
+document.querySelectorAll('input[name="searchMode"]');
+
+modeRadios.forEach(radio=>{
+
+    radio.addEventListener("change",()=>{
+
+        if(radio.value==="select"){
+
+            selectMode.style.display="block";
+            manualMode.style.display="none";
+
+        }
+
+        else{
+
+            selectMode.style.display="none";
+            manualMode.style.display="block";
+
+        }
+
+    });
+
+});
+
+routeSelect.addEventListener("change",()=>{
+
+    loadStops(routeSelect.value);
+
+});
+
+routeSearch.addEventListener("input", filterRoutes);
 
 
 async function apiGet(url){
@@ -120,6 +168,16 @@ async function getRoute(route){
 
 }
 
+async function getAllRoutes(){
+
+    return await apiGet(
+
+`${API_BASE}/Bus/Route/City/${CITY}?$format=JSON`
+
+    );
+
+}
+
 async function getStops(route){
 
     return await apiGet(
@@ -130,6 +188,44 @@ async function getStops(route){
 
 }
 
+function detectDirection(route, startName, endName) {
+
+    const stopData = stopCache[route];
+
+    for (const dir of stopData) {
+
+        const startStops = dir.Stops.filter(
+            stop => stop.StopName.Zh_tw === startName
+        );
+
+        const endStops = dir.Stops.filter(
+            stop => stop.StopName.Zh_tw === endName
+        );
+
+        for (const startStop of startStops) {
+
+            for (const endStop of endStops) {
+
+                if (startStop.StopSequence < endStop.StopSequence) {
+
+                    return {
+                        direction: dir.Direction,
+                        startStop,
+                        endStop
+                    };
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return null;
+
+}
+
 async function getETA(route){
 
     return await apiGet(
@@ -137,6 +233,277 @@ async function getETA(route){
 `${API_BASE}/Bus/EstimatedTimeOfArrival/City/${CITY}/${encodeURIComponent(route)}?$format=JSON`
 
     );
+
+}
+
+async function loadRoutes(){
+
+    try{
+
+        console.log("① loadRoutes 開始");
+
+        const data = await getAllRoutes();
+
+        console.log("② API回傳：", data);
+
+        // 去除重複路線
+        const routes = [...new Set(
+
+            data.map(item=>item.RouteName.Zh_tw)
+
+        )];
+
+        // 公車路線排序
+        routes.sort(busRouteCompare);
+        console.log("③ 路線數量：", routes.length);
+
+        routeListCache = routes;
+
+        console.log("④ routeSelect =", routeSelect);
+
+       renderRouteOptions(routes);
+
+        console.log("已載入",routes.length,"條路線");
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+function renderRouteOptions(routes){
+
+    routeSelect.innerHTML =
+        '<option value="">請選擇路線</option>';
+
+    routes.forEach(route=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value = route;
+
+        option.textContent = route;
+
+        routeSelect.appendChild(option);
+
+    });
+
+}
+
+function filterRoutes() {
+
+    const keyword = routeSearch.value
+        .trim()
+        .toLowerCase();
+
+    if (keyword === "") {
+
+        renderRouteOptions(routeListCache);
+        return;
+
+    }
+
+    const filtered = routeListCache
+        .filter(route =>
+            route.toLowerCase().includes(keyword)
+        )
+        .sort((a, b) => {
+
+            const aa = a.toLowerCase();
+            const bb = b.toLowerCase();
+
+            // 完全相同
+            if (aa === keyword && bb !== keyword) return -1;
+            if (bb === keyword && aa !== keyword) return 1;
+
+            // 開頭符合
+            const aStarts = aa.startsWith(keyword);
+            const bStarts = bb.startsWith(keyword);
+
+            if (aStarts && !bStarts) return -1;
+            if (!aStarts && bStarts) return 1;
+
+            // 仍維持原本公車排序
+            return busRouteCompare(a, b);
+
+        });
+
+    renderRouteOptions(filtered);
+
+}
+
+async function loadStops(route){
+
+    if(!route){
+
+        startSelect.innerHTML =
+            '<option value="">請先選擇路線</option>';
+
+        endSelect.innerHTML =
+            '<option value="">請先選擇路線</option>';
+
+        startSelect.disabled = true;
+        endSelect.disabled = true;
+
+        return;
+
+    }
+
+    try{
+
+        // 已快取就直接使用
+        if(stopCache[route]){
+
+            fillStopSelects(route);
+
+            return;
+
+        }
+
+        const stopData = await getStops(route);
+
+        stopCache[route] = stopData;
+
+        console.log("已快取站牌：", route);
+
+        fillStopSelects(route);
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+function fillStopSelects(route){
+
+    const stopData = stopCache[route];
+
+    startSelect.innerHTML =
+        '<option value="">請選擇起站</option>';
+
+    endSelect.innerHTML =
+        '<option value="">請選擇終點</option>';
+
+    startSelect.disabled = false;
+    endSelect.disabled = false;
+
+    const added = new Set();
+
+    stopData.forEach(dir => {
+
+        dir.Stops.forEach(stop => {
+
+            const name = stop.StopName.Zh_tw;
+
+            if (added.has(name)) return;
+
+            added.add(name);
+
+            const option1 = document.createElement("option");
+            option1.value = name;
+            option1.textContent = name;
+            startSelect.appendChild(option1);
+
+            const option2 = document.createElement("option");
+            option2.value = name;
+            option2.textContent = name;
+            endSelect.appendChild(option2);
+
+        });
+
+    });
+
+}
+
+function busRouteCompare(a, b) {
+
+    function parse(route) {
+
+        // 分類優先順序
+        const prefixOrder = [
+            "",
+            "紅",
+            "藍",
+            "棕",
+            "綠",
+            "小",
+            "幹線",
+            "市民小巴",
+            "內科",
+            "南軟",
+            "跳蛙"
+        ];
+
+        const match = route.match(/^([^\d]*?)(\d+)(.*)$/);
+
+        if (match) {
+
+            const prefix = match[1];
+            const number = parseInt(match[2]);
+            const suffix = match[3];
+
+            let order = prefixOrder.indexOf(prefix);
+
+            if (order === -1) {
+                order = prefixOrder.length;
+            }
+
+            return {
+                order,
+                prefix,
+                number,
+                suffix
+            };
+
+        }
+
+        // 完全沒有數字
+        return {
+
+            order: prefixOrder.length + 1,
+            prefix: route,
+            number: 0,
+            suffix: ""
+
+        };
+
+    }
+
+    const A = parse(a);
+    const B = parse(b);
+
+    // 第一層：分類
+    if (A.order !== B.order) {
+
+        return A.order - B.order;
+
+    }
+
+    // 第二層：前綴
+    if (A.prefix !== B.prefix) {
+
+        return A.prefix.localeCompare(B.prefix, "zh-TW");
+
+    }
+
+    // 第三層：數字
+    if (A.number !== B.number) {
+
+        return A.number - B.number;
+
+    }
+
+    // 第四層：副、區、快...
+    return A.suffix.localeCompare(B.suffix, "zh-TW");
 
 }
 
@@ -158,7 +525,7 @@ function formatETA(sec){
 
 }
 
-async function searchBus() {
+async function searchBus(route, start, end) {
 
     try {
 
@@ -166,108 +533,69 @@ async function searchBus() {
         loading.style.display = "block";
         resultCard.style.display = "none";
 
-        const route = routeInput.value.trim();
-        const start = startInput.value.trim();
-        const end = endInput.value.trim();
-
         if (!route || !start || !end) {
             throw new Error("請輸入完整資訊");
         }
 
-        // 取得站牌資料
-        const stopData = await getStops(route);
+        // 自動判斷方向
+        const directionResult = detectDirection(route, start, end);
 
-        let direction = null;
-        let stopUID = null;
-
-        // 找方向與 StopUID
-        for (const dir of stopData) {
-
-            const startIndex = dir.Stops.findIndex(
-                s => s.StopName.Zh_tw === start
-            );
-
-            const endIndex = dir.Stops.findIndex(
-                s => s.StopName.Zh_tw === end
-            );
-
-            if (
-                startIndex !== -1 &&
-                endIndex !== -1 &&
-                startIndex < endIndex
-            ) {
-
-                direction = dir.Direction;
-                stopUID = dir.Stops[startIndex].StopUID;
-
-                break;
-
-            }
-
+        if (!directionResult) {
+            throw new Error("找不到符合的行駛方向");
         }
 
-        if (!stopUID) {
-
-            throw new Error("找不到起點或終點");
-
-        }
+        const direction = directionResult.direction;
+        const stopUID = directionResult.startStop.StopUID;
 
         console.log("Direction =", direction);
         console.log("StopUID =", stopUID);
 
-        // 取得 ETA
+        // 每30秒更新一次
         clearInterval(refreshTimer);
 
-refreshTimer=setInterval(()=>{
+        refreshTimer = setInterval(() => {
+            searchBus(route, start, end);
+        }, 30000);
 
-    searchBus();
+        // 取得 ETA
+        const etaData = await getETA(route);
 
-},30000);
+        // 篩選同一站、同一方向
+        const etaResult = etaData.filter(item =>
+            item.StopUID === stopUID &&
+            item.Direction === direction
+        );
 
-const etaData = await getETA(route);
+        // 依到站時間排序
+        etaResult.sort((a, b) => {
 
-// 只留下同一站、同一方向
-const result = etaData.filter(item =>
-    item.StopUID === stopUID &&
-    item.Direction === direction
-);
+            const ta = a.EstimateTime ?? 999999;
+            const tb = b.EstimateTime ?? 999999;
 
-// 依到站時間排序
-result.sort((a, b) => {
+            return ta - tb;
 
-    const ta = a.EstimateTime ?? 999999;
-    const tb = b.EstimateTime ?? 999999;
+        });
 
-    return ta - tb;
+        routeName.textContent = route;
+        destination.textContent = `${start} → ${end}`;
 
-});
+        eta1.textContent = formatETA(etaResult[0]?.EstimateTime);
 
-routeName.textContent = route;
+        // 先保留，下一版會做第二、第三班
+        eta2.textContent = "--";
+        eta3.textContent = "--";
 
-destination.textContent =
-`${start} → ${end}`;
+        updateTime.textContent =
+            new Date().toLocaleTimeString("zh-TW");
 
-eta1.textContent =
-formatETA(result[0]?.EstimateTime);
-
-// 先保留空白
-eta2.textContent="--";
-
-eta3.textContent="--";
-
-updateTime.textContent =
-new Date().toLocaleTimeString("zh-TW");
-
-resultCard.style.display="block";
+        resultCard.style.display = "block";
 
     }
-
     catch (err) {
 
         error.textContent = err.message;
 
     }
-
     finally {
 
         loading.style.display = "none";
@@ -276,15 +604,69 @@ resultCard.style.display="block";
 
 }
 
-searchBtn.addEventListener("click", searchBus);
+searchBtn.addEventListener("click",()=>{
+
+    const mode=document.querySelector(
+        'input[name="searchMode"]:checked'
+    ).value;
+
+    let route,start,end;
+
+    if(mode==="manual"){
+
+        route=routeInput.value.trim();
+
+        start=startInput.value.trim();
+
+        end=endInput.value.trim();
+
+    }
+
+    else{
+
+        route=routeSelect.value;
+
+        start=startSelect.value;
+
+        end=endSelect.value;
+
+    }
+
+    searchBus(route,start,end);
+
+});
 
 document.addEventListener("keydown",e=>{
 
-    if(e.key==="Enter"){
+    if(e.key!=="Enter") return;
 
-        searchBus();
+    const mode=document.querySelector(
+        'input[name="searchMode"]:checked'
+    ).value;
+
+    let route,start,end;
+
+    if(mode==="manual"){
+
+        route=routeInput.value.trim();
+
+        start=startInput.value.trim();
+
+        end=endInput.value.trim();
 
     }
+
+    else{
+
+        route=routeSelect.value;
+
+        start=startSelect.value;
+
+        end=endSelect.value;
+
+    }
+
+    searchBus(route,start,end);
 
 });
 
@@ -435,10 +817,19 @@ function renderFavorites(){
 
             endInput.value=item.end;
 
-            searchBus();
+            searchBus(
+
+                item.route,
+
+                item.start,
+
+                item.end
+
+            );
 
         };
 
+        
         card.querySelector(".deleteBtn")
 
         .onclick=()=>{
@@ -466,4 +857,14 @@ favoriteBtn.onclick=()=>{
 
 };
 
-renderFavorites();
+async function init(){
+
+    await getToken();
+
+    await loadRoutes();
+
+    renderFavorites();
+
+}
+
+init();

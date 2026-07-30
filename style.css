@@ -18,7 +18,8 @@ body{
     box-shadow:0 0 10px rgba(0,0,0,.1);
 }
 
-input{
+input,
+select{
 
     width:100%;
 
@@ -61,6 +62,39 @@ button{
     color:white;
 
     border:none;
+
+}
+
+.modeArea{
+
+    margin-bottom:20px;
+
+}
+
+.modeArea label{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    margin-right:20px;
+
+    cursor:pointer;
+
+}
+
+.modeArea input[type="radio"]{
+
+    width:auto;
+
+    margin:0 8px 0 0;
+
+}
+
+#selectMode,
+#manualMode{
+
+    margin-bottom:10px;
 
 }
 

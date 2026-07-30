@@ -22,6 +22,67 @@ if ("serviceWorker" in navigator) {
 
     <h1>🚌 BusTrackerTW</h1>
 
+    <!-- 查詢模式 -->
+
+<div class="modeArea">
+
+    <label>
+        <input type="radio"
+               name="searchMode"
+               value="select"
+               checked>
+
+        選單查詢
+    </label>
+
+    <label style="margin-left:20px">
+
+        <input type="radio"
+               name="searchMode"
+               value="manual">
+
+        手動輸入
+
+    </label>
+
+</div>
+
+<br>
+
+<!-- 選單模式 -->
+
+<div id="selectMode">
+ <input
+        id="routeSearch"
+        type="text"
+        placeholder="🔍 搜尋路線..."
+    >
+
+    <br><br>
+    <select id="routeSelect">
+
+        <option value="">請選擇路線</option>
+
+    </select>
+
+    <select id="startSelect" disabled>
+
+        <option value="">請先選擇路線</option>
+
+    </select>
+
+    <select id="endSelect" disabled>
+
+        <option value="">請先選擇路線</option>
+
+    </select>
+
+</div>
+
+<!-- 手動模式 -->
+
+<div id="manualMode" style="display:none">
+
     <input
         id="routeInput"
         placeholder="公車路線，例如 606">
@@ -33,6 +94,8 @@ if ("serviceWorker" in navigator) {
     <input
         id="endInput"
         placeholder="終點站">
+
+</div>
 
     <button id="searchBtn">
         查詢
