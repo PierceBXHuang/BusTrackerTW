@@ -2,20 +2,25 @@
 <html lang="zh-TW">
 
 <head>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1976d2">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>BusTrackerTW</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1976d2">
+
+    <!-- Icon -->
+    <link rel="icon" type="image/jpeg" href="icons/appbus.jpg">
+    <link rel="apple-touch-icon" href="icons/appbus.jpg">
+
 </head>
-<script>
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-}
-</script>
+
 <body>
 
 <div class="container">
@@ -24,78 +29,87 @@ if ("serviceWorker" in navigator) {
 
     <!-- 查詢模式 -->
 
-<div class="modeArea">
+    <div class="modeArea">
 
-    <label>
-        <input type="radio"
-               name="searchMode"
-               value="select"
-               checked>
+        <label>
+            <input
+                type="radio"
+                name="searchMode"
+                value="select"
+                checked>
 
-        選單查詢
-    </label>
+            選單查詢
+        </label>
 
-    <label style="margin-left:20px">
+        <label style="margin-left:20px">
 
-        <input type="radio"
-               name="searchMode"
-               value="manual">
+            <input
+                type="radio"
+                name="searchMode"
+                value="manual">
 
-        手動輸入
+            手動輸入
 
-    </label>
+        </label>
 
-</div>
+    </div>
 
-<br>
+    <br>
 
-<!-- 選單模式 -->
+    <!-- 選單模式 -->
 
-<div id="selectMode">
- <input
-        id="routeSearch"
-        type="text"
-        placeholder="🔍 搜尋路線..."
-    >
+    <div id="selectMode">
 
-    <br><br>
-    <select id="routeSelect">
+        <input
+            id="routeSearch"
+            type="text"
+            placeholder="🔍 搜尋路線...">
 
-        <option value="">請選擇路線</option>
+        <br><br>
 
-    </select>
+        <select id="routeSelect">
 
-    <select id="startSelect" disabled>
+            <option value="">
+                請選擇路線
+            </option>
 
-        <option value="">請先選擇路線</option>
+        </select>
 
-    </select>
+        <select id="startSelect" disabled>
 
-    <select id="endSelect" disabled>
+            <option value="">
+                請先選擇路線
+            </option>
 
-        <option value="">請先選擇路線</option>
+        </select>
 
-    </select>
+        <select id="endSelect" disabled>
 
-</div>
+            <option value="">
+                請先選擇路線
+            </option>
 
-<!-- 手動模式 -->
+        </select>
 
-<div id="manualMode" style="display:none">
+    </div>
 
-    <input
-        id="routeInput"
-        placeholder="公車路線，例如 606">
+    <!-- 手動模式 -->
 
-    <input
-        id="startInput"
-        placeholder="起點站">
+    <div id="manualMode" style="display:none">
 
-    <input
-        id="endInput"
-        placeholder="終點站">
+        <input
+            id="routeInput"
+            placeholder="公車路線，例如 606">
 
-</div>
+        <input
+            id="startInput"
+            placeholder="起點站">
+
+        <input
+            id="endInput"
+            placeholder="終點站">
+
+    </div>
 
     <button id="searchBtn">
         查詢
@@ -106,7 +120,9 @@ if ("serviceWorker" in navigator) {
     </button>
 
     <div id="loading" style="display:none">
+
         查詢中...
+
     </div>
 
     <div id="error"></div>
@@ -119,11 +135,20 @@ if ("serviceWorker" in navigator) {
 
         <hr>
 
-        <p>第一班：<span id="eta1">--</span></p>
+        <p>
+            第一班：
+            <span id="eta1">--</span>
+        </p>
 
-        <p>第二班：<span id="eta2">--</span></p>
+        <p>
+            第二班：
+            <span id="eta2">--</span>
+        </p>
 
-        <p>第三班：<span id="eta3">--</span></p>
+        <p>
+            第三班：
+            <span id="eta3">--</span>
+        </p>
 
         <hr>
 
@@ -143,7 +168,33 @@ if ("serviceWorker" in navigator) {
 
 </div>
 
+<!-- 主程式 -->
 <script src="script.js"></script>
+
+<!-- Service Worker -->
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker.register("./sw.js")
+            .then(() => {
+
+                console.log("✅ Service Worker 已註冊");
+
+            })
+            .catch(err => {
+
+                console.error("Service Worker 註冊失敗", err);
+
+            });
+
+    });
+
+}
+
+</script>
 
 </body>
 

@@ -188,11 +188,15 @@ async function getStops(route){
 
 }
 
-function detectDirection(route, startName, endName) {
+function detectDirection(route, startName, endName){
 
     const stopData = stopCache[route];
 
-    for (const dir of stopData) {
+    if(!stopData){
+        return null;
+    }
+
+    for(const dir of stopData){
 
         const startStops = dir.Stops.filter(
             stop => stop.StopName.Zh_tw === startName
@@ -202,13 +206,13 @@ function detectDirection(route, startName, endName) {
             stop => stop.StopName.Zh_tw === endName
         );
 
-        for (const startStop of startStops) {
+        for(const startStop of startStops){
 
-            for (const endStop of endStops) {
+            for(const endStop of endStops){
 
-                if (startStop.StopSequence < endStop.StopSequence) {
+                if(startStop.StopSequence < endStop.StopSequence){
 
-                    return {
+                    return{
                         direction: dir.Direction,
                         startStop,
                         endStop
@@ -387,6 +391,11 @@ function fillStopSelects(route){
 
     const stopData = stopCache[route];
 
+    if(!stopData){
+        console.error("找不到站牌資料");
+        return;
+    }
+
     startSelect.innerHTML =
         '<option value="">請選擇起站</option>';
 
@@ -398,13 +407,13 @@ function fillStopSelects(route){
 
     const added = new Set();
 
-    stopData.forEach(dir => {
+    stopData.forEach(dir=>{
 
-        dir.Stops.forEach(stop => {
+        dir.Stops.forEach(stop=>{
 
             const name = stop.StopName.Zh_tw;
 
-            if (added.has(name)) return;
+            if(added.has(name)) return;
 
             added.add(name);
 
@@ -511,7 +520,7 @@ function formatETA(sec){
 
     if(sec==null){
 
-        return "--";
+        return "未發車";
 
     }
 
@@ -538,7 +547,8 @@ async function searchBus(route, start, end) {
         }
 
         // 自動判斷方向
-        const directionResult = detectDirection(route, start, end);
+        const directionResult =
+        await detectDirection(route, start, end);
 
         if (!directionResult) {
             throw new Error("找不到符合的行駛方向");
@@ -699,14 +709,25 @@ function saveFavorites(list){
 
 function addFavorite(){
 
-    const route =
-        routeInput.value.trim();
+    const mode = document.querySelector(
+    'input[name="searchMode"]:checked'
+    ).value;
 
-    const start =
-        startInput.value.trim();
+    let route, start, end;
 
-    const end =
-        endInput.value.trim();
+    if (mode === "manual") {
+
+        route = routeInput.value.trim();
+        start = startInput.value.trim();
+        end = endInput.value.trim();
+
+    } else {
+
+        route = routeSelect.value;
+        start = startSelect.value;
+        end = endSelect.value;
+
+    }
 
     if(!route||!start||!end){
 
