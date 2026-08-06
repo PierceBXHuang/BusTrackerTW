@@ -8,16 +8,17 @@
 
     <title>BusTrackerTW</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-
     <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1976d2">
+    <link rel="manifest" href="manifest.json">
 
     <!-- Icon -->
     <link rel="icon" type="image/jpeg" href="icons/appbus.jpg">
+    <link rel="shortcut icon" href="icons/appbus.jpg">
     <link rel="apple-touch-icon" href="icons/appbus.jpg">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -28,7 +29,6 @@
     <h1>🚌 BusTrackerTW</h1>
 
     <!-- 查詢模式 -->
-
     <div class="modeArea">
 
         <label>
@@ -37,7 +37,6 @@
                 name="searchMode"
                 value="select"
                 checked>
-
             選單查詢
         </label>
 
@@ -57,7 +56,6 @@
     <br>
 
     <!-- 選單模式 -->
-
     <div id="selectMode">
 
         <input
@@ -68,33 +66,20 @@
         <br><br>
 
         <select id="routeSelect">
-
-            <option value="">
-                請選擇路線
-            </option>
-
+            <option value="">請選擇路線</option>
         </select>
 
         <select id="startSelect" disabled>
-
-            <option value="">
-                請先選擇路線
-            </option>
-
+            <option value="">請先選擇路線</option>
         </select>
 
         <select id="endSelect" disabled>
-
-            <option value="">
-                請先選擇路線
-            </option>
-
+            <option value="">請先選擇路線</option>
         </select>
 
     </div>
 
     <!-- 手動模式 -->
-
     <div id="manualMode" style="display:none">
 
         <input
@@ -120,9 +105,7 @@
     </button>
 
     <div id="loading" style="display:none">
-
         查詢中...
-
     </div>
 
     <div id="error"></div>
@@ -135,29 +118,17 @@
 
         <hr>
 
-        <p>
-            第一班：
-            <span id="eta1">--</span>
-        </p>
+        <p>第一班：<span id="eta1">--</span></p>
 
-        <p>
-            第二班：
-            <span id="eta2">--</span>
-        </p>
+        <p>第二班：<span id="eta2">--</span></p>
 
-        <p>
-            第三班：
-            <span id="eta3">--</span>
-        </p>
+        <p>第三班：<span id="eta3">--</span></p>
 
         <hr>
 
         <small>
-
             更新時間：
-
             <span id="updateTime"></span>
-
         </small>
 
     </div>
@@ -168,27 +139,17 @@
 
 </div>
 
-<!-- 主程式 -->
 <script src="script.js"></script>
 
-<!-- Service Worker -->
 <script>
 
 if ("serviceWorker" in navigator) {
 
     window.addEventListener("load", () => {
 
-        navigator.serviceWorker.register("./sw.js")
-            .then(() => {
-
-                console.log("✅ Service Worker 已註冊");
-
-            })
-            .catch(err => {
-
-                console.error("Service Worker 註冊失敗", err);
-
-            });
+        navigator.serviceWorker.register("sw.js")
+            .then(() => console.log("✅ Service Worker 已註冊"))
+            .catch(err => console.error("Service Worker 註冊失敗", err));
 
     });
 
@@ -197,5 +158,4 @@ if ("serviceWorker" in navigator) {
 </script>
 
 </body>
-
 </html>
