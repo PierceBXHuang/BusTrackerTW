@@ -1,31 +1,15 @@
 {
-  "id": "/BusTrackerTW/",
   "name": "BusTracker",
   "short_name": "Bus",
-  "description": "台灣公車即時動態查詢",
-  "lang": "zh-TW",
-
-  "start_url": "/BusTrackerTW/",
-  "scope": "/BusTrackerTW/",
-
+  "start_url": ".",
   "display": "standalone",
-  "orientation": "portrait",
-
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
-
   "icons": [
     {
-      "src": "icons/appbus-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/appbus-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "icons/appbus.jpg",
+      "sizes": "1254x1254",
+      "type": "image/jpeg"
     }
   ]
 }

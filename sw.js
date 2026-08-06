@@ -1,4 +1,4 @@
-const CACHE_NAME = "bustracker-v2";
+const CACHE_NAME = "bus-tracker-v2";
 
 const urlsToCache = [
     "./",
@@ -6,25 +6,25 @@ const urlsToCache = [
     "./style.css",
     "./script.js",
     "./manifest.json",
-
-    "./icons/appbus-192.png",
-    "./icons/appbus-512.png"
+    "./icons/appbus.png"
 ];
 
+// 安裝
 self.addEventListener("install", event => {
+
+    self.skipWaiting();
 
     event.waitUntil(
 
         caches.open(CACHE_NAME)
 
-        .then(cache => cache.addAll(urlsToCache))
+            .then(cache => cache.addAll(urlsToCache))
 
     );
 
-    self.skipWaiting();
-
 });
 
+// 啟用
 self.addEventListener("activate", event => {
 
     event.waitUntil(
@@ -53,17 +53,26 @@ self.addEventListener("activate", event => {
 
 });
 
+// 請求
 self.addEventListener("fetch", event => {
 
     event.respondWith(
 
-        caches.match(event.request)
+        fetch(event.request)
 
-        .then(response => {
+            .then(response => {
 
-            return response || fetch(event.request);
+                const copy = response.clone();
 
-        })
+                caches.open(CACHE_NAME)
+
+                    .then(cache => cache.put(event.request, copy));
+
+                return response;
+
+            })
+
+            .catch(() => caches.match(event.request))
 
     );
 
